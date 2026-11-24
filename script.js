@@ -1,66 +1,129 @@
 document.addEventListener("DOMContentLoaded", () => {
   const ADMIN_WA_NUMBER = "62882005161406";
+  const $ = (id) => document.getElementById(id);
 
-  const navToggle = document.getElementById("navToggle");
-  const navLinks = document.getElementById("navLinks");
-  const serviceSelect = document.getElementById("serviceType");
-  const selectButtons = document.querySelectorAll(".select-service");
-  const orderForm = document.getElementById("orderForm");
-  const summaryOutput = document.getElementById("summaryOutput");
-  const summaryText = document.getElementById("summaryText");
-  const copySummaryBtn = document.getElementById("copySummaryBtn");
-
-  const windowsFields = document.getElementById("windowsFields");
-  const generalServiceFields = document.getElementById("generalServiceFields");
-  const packageSelect = document.getElementById("packageType");
-  const packageInfo = document.getElementById("packageInfo");
-  const officeField = document.getElementById("officeField");
-  const officeSelect = document.getElementById("officeVersion");
-  const officeLicenseSelect = document.getElementById("officeLicense");
-  const premiumAppsField = document.getElementById("premiumAppsField");
-  const extraApps = document.getElementById("extraApps");
-  const appsCounter = document.getElementById("appsCounter");
-  const licenseConsentRow = document.getElementById("licenseConsentRow");
-  const licenseConsent = document.getElementById("licenseConsent");
-  const generalDetails = document.getElementById("generalDetails");
+  const navToggle = $("navToggle");
+  const navLinks = $("navLinks");
+  const serviceSelect = $("serviceType");
+  const orderForm = $("orderForm");
+  const summaryOutput = $("summaryOutput");
+  const summaryText = $("summaryText");
+  const copySummaryBtn = $("copySummaryBtn");
+  const windowsFields = $("windowsFields");
+  const generalServiceFields = $("generalServiceFields");
+  const packageSelect = $("packageType");
+  const packageInfo = $("packageInfo");
+  const officeField = $("officeField");
+  const officeSelect = $("officeVersion");
+  const officeLicenseSelect = $("officeLicense");
+  const premiumAppsField = $("premiumAppsField");
+  const extraApps = $("extraApps");
+  const appsCounter = $("appsCounter");
+  const licenseConsentRow = $("licenseConsentRow");
+  const licenseConsent = $("licenseConsent");
+  const generalDetails = $("generalDetails");
 
   const packages = {
     Basic: {
       price: 100000,
       label: "Paket Basic",
-      description: "Install Windows 10/11, install driver, Windows Update, pengaturan dasar Windows, pengecekan fungsi perangkat, dan pembersihan file sementara."
+      subtitle: "Instalasi Dasar",
+      features: [
+        "Install ulang Windows 10/11",
+        "Install driver perangkat",
+        "Windows Update",
+        "Pengaturan dasar Windows",
+        "Pengecekan fungsi perangkat",
+        "Pembersihan file sementara"
+      ]
     },
     Standard: {
       price: 135000,
       label: "Paket Standard",
-      description: "Semua layanan Basic, instalasi Microsoft Office 2019/2021 (jika tersedia lisensi), Google Chrome, PDF Reader, WinRAR/7-Zip, dan konfigurasi aplikasi dasar."
+      subtitle: "Windows + Office",
+      features: [
+        "Semua layanan Paket Basic",
+        "Install Microsoft Office 2019/2021 jika lisensi tersedia",
+        "Google Chrome dan PDF Reader",
+        "WinRAR / 7-Zip",
+        "Konfigurasi aplikasi dasar"
+      ]
     },
     Premium: {
       price: 175000,
       label: "Paket Premium",
-      description: "Semua layanan Standard, request maksimal 5 aplikasi tambahan, optimasi Windows, pengaturan tampilan dan sistem, pengecekan menyeluruh, serta konsultasi penggunaan."
+      subtitle: "Full Service",
+      features: [
+        "Semua layanan Paket Standard",
+        "Request maksimal 5 aplikasi tambahan",
+        "Optimasi Windows",
+        "Pengaturan tampilan dan sistem",
+        "Pengecekan menyeluruh",
+        "Konsultasi penggunaan"
+      ]
     }
   };
 
   const formatRupiah = (amount) => new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0
+    style: "currency", currency: "IDR", maximumFractionDigits: 0
   }).format(amount);
 
-  // Toggle menu mobile
+  const value = (id, fallback = "Tidak diisi") => {
+    const el = $(id);
+    if (!el) return fallback;
+    const result = typeof el.value === "string" ? el.value.trim() : "";
+    return result || fallback;
+  };
+
   if (navToggle && navLinks) {
     navToggle.addEventListener("click", () => {
       const isOpen = navLinks.classList.toggle("is-open");
       navToggle.setAttribute("aria-expanded", String(isOpen));
     });
+    navLinks.querySelectorAll("a").forEach((link) => link.addEventListener("click", () => {
+      navLinks.classList.remove("is-open");
+      navToggle.setAttribute("aria-expanded", "false");
+    }));
+  }
 
-    navLinks.querySelectorAll("a").forEach((link) => {
-      link.addEventListener("click", () => {
-        navLinks.classList.remove("is-open");
-        navToggle.setAttribute("aria-expanded", "false");
-      });
+  function updateAppsCounter() {
+    if (!extraApps || !appsCounter) return;
+    const apps = extraApps.value.split("\n").map((item) => item.trim()).filter(Boolean);
+    appsCounter.textContent = `${apps.length}/5 aplikasi`;
+    appsCounter.classList.toggle("is-over-limit", apps.length > 5);
+    extraApps.setCustomValidity(apps.length > 5 ? "Maksimal 5 aplikasi. Hapus aplikasi yang berlebih." : "");
+  }
+
+  function updatePackageFields() {
+    if (!packageSelect || !packageInfo) return;
+    const selectedPackage = packageSelect.value;
+    const packageData = packages[selectedPackage] || packages.Basic;
+    const isWindowsOrder = serviceSelect.value === "Install Ulang Laptop";
+    const includesOffice = selectedPackage === "Standard" || selectedPackage === "Premium";
+    const isPremium = selectedPackage === "Premium";
+
+    // Selalu render ulang spesifikasi berdasarkan nilai dropdown TERKINI.
+    packageInfo.replaceChildren();
+    const heading = document.createElement("strong");
+    heading.textContent = `${packageData.label} — ${formatRupiah(packageData.price)} (${packageData.subtitle})`;
+    const list = document.createElement("ul");
+    packageData.features.forEach((feature) => {
+      const item = document.createElement("li");
+      item.textContent = feature;
+      list.appendChild(item);
     });
+    packageInfo.append(heading, list);
+
+    officeField.hidden = !includesOffice || !isWindowsOrder;
+    officeSelect.required = includesOffice && isWindowsOrder;
+    officeSelect.disabled = !includesOffice || !isWindowsOrder;
+    officeLicenseSelect.required = includesOffice && isWindowsOrder;
+    officeLicenseSelect.disabled = !includesOffice || !isWindowsOrder;
+
+    premiumAppsField.hidden = !isPremium || !isWindowsOrder;
+    extraApps.disabled = !isPremium || !isWindowsOrder;
+    extraApps.required = isPremium && isWindowsOrder;
+    updateAppsCounter();
   }
 
   function updateServiceFields() {
@@ -68,7 +131,10 @@ document.addEventListener("DOMContentLoaded", () => {
     windowsFields.hidden = !isWindowsOrder;
     generalServiceFields.hidden = isWindowsOrder;
     windowsFields.querySelectorAll("input, select, textarea").forEach((control) => {
-      control.disabled = !isWindowsOrder;
+      if (control === licenseConsent) return;
+      control.disabled = !isWindowsOrder ||
+        ((control === officeSelect || control === officeLicenseSelect) && !(packageSelect.value === "Standard" || packageSelect.value === "Premium")) ||
+        (control === extraApps && packageSelect.value !== "Premium");
     });
     licenseConsentRow.hidden = !isWindowsOrder;
     licenseConsent.required = isWindowsOrder;
@@ -78,91 +144,75 @@ document.addEventListener("DOMContentLoaded", () => {
     updatePackageFields();
   }
 
-  function updatePackageFields() {
-    const selectedPackage = packageSelect.value;
-    const packageData = packages[selectedPackage];
-    const includesOffice = selectedPackage === "Standard" || selectedPackage === "Premium";
-    const isPremium = selectedPackage === "Premium";
-
-    packageInfo.innerHTML = `<strong>${packageData.label} — ${formatRupiah(packageData.price)}</strong><p>${packageData.description}</p>`;
-    const isWindowsOrder = serviceSelect.value === "Install Ulang Laptop";
-    officeField.hidden = !includesOffice;
-    officeSelect.required = includesOffice && isWindowsOrder;
-    officeSelect.disabled = !includesOffice || !isWindowsOrder;
-    officeLicenseSelect.required = includesOffice && isWindowsOrder;
-    officeLicenseSelect.disabled = !includesOffice || !isWindowsOrder;
-    premiumAppsField.hidden = !isPremium;
-    extraApps.disabled = !isPremium || !isWindowsOrder;
-    updateAppsCounter();
-  }
-
-  function updateAppsCounter() {
-    const apps = extraApps.value.split("\n").map((item) => item.trim()).filter(Boolean);
-    appsCounter.textContent = `${apps.length}/5 aplikasi`;
-    appsCounter.classList.toggle("is-over-limit", apps.length > 5);
-    extraApps.setCustomValidity(apps.length > 5 ? "Maksimal 5 aplikasi. Hapus aplikasi yang berlebih." : "");
-  }
-
-  // Pilih layanan dari kartu lalu arahkan ke form pemesanan
-  selectButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const chosenService = btn.getAttribute("data-service");
-      if (chosenService && serviceSelect) {
+  document.querySelectorAll(".select-service").forEach((button) => {
+    button.addEventListener("click", () => {
+      const chosenService = button.getAttribute("data-service");
+      if (chosenService) {
         serviceSelect.value = chosenService;
         updateServiceFields();
       }
-      const orderSection = document.getElementById("order");
-      if (orderSection) orderSection.scrollIntoView({ behavior: "smooth" });
+      $("order")?.scrollIntoView({ behavior: "smooth" });
     });
   });
 
   serviceSelect.addEventListener("change", updateServiceFields);
-  packageSelect.addEventListener("change", updatePackageFields);
+  // Delegasi change menjaga dropdown tetap terpantau jika markup diubah.
+  orderForm.addEventListener("change", (event) => {
+    if (event.target === packageSelect) updatePackageFields();
+  });
   extraApps.addEventListener("input", updateAppsCounter);
 
   function buildSummary() {
-    const nama = document.getElementById("clientName").value.trim();
-    const nomor = document.getElementById("clientPhone").value.trim();
-    const layanan = serviceSelect.value;
-    const target = document.getElementById("deadline").value.trim() || "Menyesuaikan";
-    const catatan = document.getElementById("notes").value.trim() || "-";
     const lines = [
-      "Halo IDN-NET (@est2025), saya ingin memesan layanan:",
-      `Nama: ${nama}`,
-      `Nomor WhatsApp: ${nomor}`,
-      `Layanan: ${layanan}`
+      "HALO IDN-NET (@est2025), SAYA INGIN MEMESAN LAYANAN",
+      "================================",
+      `Nama lengkap: ${value("clientName")}`,
+      `Nomor WhatsApp pelanggan: ${value("clientPhone")}`,
+      `Jenis layanan: ${serviceSelect.value}`
     ];
 
-    if (layanan === "Install Ulang Laptop") {
+    if (serviceSelect.value === "Install Ulang Laptop") {
       const chosenPackage = packageSelect.value;
-      const packageData = packages[chosenPackage];
+      const packageData = packages[chosenPackage] || packages.Basic;
       lines.push(
-        `Paket: ${packageData.label}`,
-        `Harga jasa: ${formatRupiah(packageData.price)}`,
-        `Windows: ${document.getElementById("windowsVersion").value}`,
-        `Perangkat: ${document.getElementById("deviceType").value}`,
-        `Merek/tipe: ${document.getElementById("deviceModel").value.trim()}`,
-        `Spesifikasi: ${document.getElementById("deviceSpecs").value.trim() || "Belum diinformasikan"}`
+        "", "DETAIL PESANAN INSTALL ULANG WINDOWS",
+        `Paket dipilih: ${packageData.label}`,
+        `Harga jasa paket: ${formatRupiah(packageData.price)}`,
+        `Spesifikasi paket: ${packageData.features.join("; ")}`,
+        `Windows yang diinginkan: ${value("windowsVersion")}`,
+        `Jenis perangkat: ${value("deviceType")}`,
+        `Merek dan tipe perangkat: ${value("deviceModel")}`,
+        `Spesifikasi perangkat: ${value("deviceSpecs", "Tidak diinformasikan")}`
       );
-
-      if (chosenPackage !== "Basic") {
+      if (chosenPackage === "Standard" || chosenPackage === "Premium") {
         lines.push(
-          `Microsoft Office: ${officeSelect.value}`,
-          `Status lisensi Office: ${officeLicenseSelect.value}`
+          `Microsoft Office yang diminta: ${value("officeVersion")}`,
+          `Status lisensi Office: ${value("officeLicense")}`
         );
+      } else {
+        lines.push("Microsoft Office: Tidak termasuk Paket Basic");
       }
       if (chosenPackage === "Premium") {
-        const requestedApps = extraApps.value.trim() || "Tidak ada request aplikasi tambahan";
-        lines.push(`Request aplikasi tambahan (maks. 5):\n${requestedApps}`);
+        lines.push(`Request aplikasi tambahan (maks. 5):\n${value("extraApps", "Tidak ada aplikasi yang diminta")}`);
+      } else {
+        lines.push("Request aplikasi tambahan: Tidak termasuk paket yang dipilih");
       }
-      lines.push(`Backup data: ${document.getElementById("backupChoice").value}`);
-      lines.push("Catatan lisensi: Lisensi/aktivasi Windows dan Office tidak termasuk biaya jasa.");
+      lines.push(
+        `Backup data: ${value("backupChoice")}`,
+        `Persetujuan ketentuan lisensi: ${licenseConsent.checked ? "Ya, saya memahami dan menyetujui" : "Belum disetujui"}`,
+        "Catatan lisensi: Biaya paket adalah jasa instalasi. Lisensi/aktivasi Windows dan Office tidak termasuk dan harus menggunakan lisensi resmi pelanggan."
+      );
     } else {
-      lines.push(`Detail kebutuhan: ${generalDetails.value.trim()}`);
+      lines.push("", "DETAIL KEBUTUHAN", `Detail: ${value("generalDetails")}`);
     }
 
-    lines.push(`Target waktu: ${target}`, `Catatan tambahan: ${catatan}`);
-    lines.push("Mohon konfirmasi ketersediaan jadwal dan total biaya. Terima kasih.");
+    lines.push(
+      "", "INFORMASI TAMBAHAN",
+      `Target waktu pengerjaan: ${value("deadline", "Menyesuaikan")}`,
+      `Catatan tambahan: ${value("notes", "Tidak ada")}`,
+      "================================",
+      "Mohon konfirmasi jadwal pengerjaan dan total biaya. Terima kasih."
+    );
     return lines.join("\n");
   }
 
@@ -176,8 +226,8 @@ document.addEventListener("DOMContentLoaded", () => {
   orderForm.addEventListener("submit", (event) => {
     event.preventDefault();
     updateAppsCounter();
+    updatePackageFields();
     if (!orderForm.reportValidity()) return;
-
     const message = showSummary();
     const waUrl = `https://wa.me/${ADMIN_WA_NUMBER}?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank", "noopener,noreferrer");
@@ -186,9 +236,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (copySummaryBtn) {
     copySummaryBtn.addEventListener("click", async () => {
       updateAppsCounter();
+      updatePackageFields();
       if (!orderForm.reportValidity()) return;
       const message = showSummary();
-
       try {
         await navigator.clipboard.writeText(message);
         const originalLabel = copySummaryBtn.textContent;
@@ -203,7 +253,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   updateServiceFields();
 
-  // Animasi muncul saat di-scroll
   const revealItems = document.querySelectorAll(".reveal");
   if ("IntersectionObserver" in window) {
     const observer = new IntersectionObserver((entries) => {
@@ -214,7 +263,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       });
     }, { threshold: 0.12 });
-
     revealItems.forEach((el) => observer.observe(el));
   } else {
     revealItems.forEach((el) => el.classList.add("is-visible"));
