@@ -170,41 +170,135 @@
 
           <form class="order-form" id="orderForm">
             <div class="field">
-              <label for="clientName">Nama Kamu</label>
-              <input type="text" id="clientName" placeholder="Masukkan nama" required />
+              <label for="clientName">Nama lengkap</label>
+              <input type="text" id="clientName" name="clientName" placeholder="Masukkan nama kamu" autocomplete="name" required />
             </div>
 
             <div class="field">
-              <label for="serviceType">Jenis Layanan</label>
-              <select id="serviceType">
-                <option value="Install Ulang Laptop">Install Ulang Laptop</option>
+              <label for="clientPhone">Nomor WhatsApp aktif</label>
+              <input type="tel" id="clientPhone" name="clientPhone" placeholder="Contoh: 08xxxxxxxxxx" autocomplete="tel" required />
+            </div>
+
+            <div class="field">
+              <label for="serviceType">Jenis layanan</label>
+              <select id="serviceType" name="serviceType" required>
+                <option value="Install Ulang Laptop" selected>Install Ulang Windows 10/11</option>
                 <option value="Joki Tugas">Joki Tugas</option>
                 <option value="Pembuatan Web Sederhana">Pembuatan Web Sederhana</option>
               </select>
             </div>
 
-            <div class="field">
-              <label for="deadline">Target / Catatan Waktu</label>
-              <input type="text" id="deadline" placeholder="Contoh: Besok sore / 3 hari" />
+            <!-- Form khusus install ulang Windows -->
+            <div id="windowsFields" class="conditional-fields">
+              <div class="field">
+                <label for="packageType">Pilih paket install ulang</label>
+                <select id="packageType" name="packageType" required>
+                  <option value="Basic">Paket Basic — Rp100.000</option>
+                  <option value="Standard">Paket Standard — Rp135.000</option>
+                  <option value="Premium">Paket Premium — Rp175.000</option>
+                </select>
+              </div>
+
+              <div class="package-info" id="packageInfo" aria-live="polite">
+                <strong>Paket Basic — Rp100.000</strong>
+                <p>Install Windows 10/11, driver, Windows Update, pengaturan dasar, pengecekan fungsi perangkat, dan pembersihan file sementara.</p>
+              </div>
+
+              <div class="form-two-columns">
+                <div class="field">
+                  <label for="windowsVersion">Windows yang diinginkan</label>
+                  <select id="windowsVersion" name="windowsVersion" required>
+                    <option value="Windows 10">Windows 10</option>
+                    <option value="Windows 11">Windows 11</option>
+                    <option value="Belum tahu, minta rekomendasi">Belum tahu / minta rekomendasi</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="deviceType">Jenis perangkat</label>
+                  <select id="deviceType" name="deviceType" required>
+                    <option value="Laptop">Laptop</option>
+                    <option value="PC/Desktop">PC / Desktop</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field">
+                <label for="deviceModel">Merek dan tipe perangkat</label>
+                <input type="text" id="deviceModel" name="deviceModel" placeholder="Contoh: ASUS VivoBook A1404 / HP 14s" required />
+              </div>
+
+              <div class="field">
+                <label for="deviceSpecs">Spesifikasi perangkat (opsional)</label>
+                <input type="text" id="deviceSpecs" name="deviceSpecs" placeholder="Contoh: RAM 8 GB, SSD 256 GB / HDD 1 TB" />
+              </div>
+
+              <div class="field" id="officeField" hidden>
+                <label for="officeVersion">Versi Microsoft Office yang diinginkan</label>
+                <select id="officeVersion" name="officeVersion">
+                  <option value="Office 2019">Microsoft Office 2019</option>
+                  <option value="Office 2021">Microsoft Office 2021</option>
+                  <option value="Belum tahu, minta rekomendasi">Belum tahu / minta rekomendasi</option>
+                </select>
+                <label for="officeLicense">Status lisensi Microsoft Office</label>
+                <select id="officeLicense" name="officeLicense">
+                  <option value="Sudah memiliki lisensi resmi">Saya sudah memiliki lisensi resmi</option>
+                  <option value="Belum memiliki lisensi, ingin konsultasi">Belum punya lisensi / ingin konsultasi</option>
+                  <option value="Tidak tahu status lisensi">Tidak tahu / perlu diperiksa</option>
+                </select>
+                <small>Office dipasang jika lisensi resmi tersedia. Pembelian lisensi tidak termasuk harga paket.</small>
+              </div>
+
+              <div class="field" id="premiumAppsField" hidden>
+                <label for="extraApps">Request aplikasi tambahan (maksimal 5 aplikasi)</label>
+                <textarea id="extraApps" name="extraApps" rows="3" placeholder="Tulis satu aplikasi per baris. Contoh:
+1. Adobe Photoshop
+2. Zoom
+3. VLC Media Player"></textarea>
+                <small>Hanya aplikasi legal, aman, dan kompatibel. Aplikasi berbayar memerlukan lisensi sendiri.</small>
+                <small id="appsCounter" class="field-hint">0/5 aplikasi</small>
+              </div>
+
+              <div class="field">
+                <label for="backupChoice">Apakah ada data penting yang perlu di-backup?</label>
+                <select id="backupChoice" name="backupChoice" required>
+                  <option value="Tidak perlu backup">Tidak perlu backup</option>
+                  <option value="Perlu backup data">Ya, perlu backup data (biaya dikonfirmasi terpisah)</option>
+                  <option value="Belum tahu, minta konsultasi">Belum tahu / minta konsultasi</option>
+                </select>
+                <small>Proses install ulang dapat menghapus data. Pastikan data penting sudah dicadangkan sebelum pengerjaan.</small>
+              </div>
+            </div>
+
+            <!-- Form umum untuk layanan selain install ulang -->
+            <div id="generalServiceFields" class="conditional-fields" hidden>
+              <div class="field">
+                <label for="generalDetails">Detail kebutuhan</label>
+                <textarea id="generalDetails" name="generalDetails" rows="4" placeholder="Jelaskan kebutuhan, spesifikasi, ketentuan, atau brief pekerjaan..."></textarea>
+              </div>
             </div>
 
             <div class="field">
-              <label for="notes">Detail Kebutuhan</label>
-              <textarea
-                id="notes"
-                rows="4"
-                placeholder="Tuliskan spesifikasi laptop, detail tugas, atau gambaran halaman web..."
-                required
-              ></textarea>
+              <label for="deadline">Target waktu pengerjaan (opsional)</label>
+              <input type="text" id="deadline" name="deadline" placeholder="Contoh: Secepatnya / Jumat sore" />
             </div>
+
+            <div class="field">
+              <label for="notes">Catatan tambahan (opsional)</label>
+              <textarea id="notes" name="notes" rows="3" placeholder="Tuliskan kendala perangkat, permintaan khusus, atau informasi tambahan..."></textarea>
+            </div>
+
+            <label class="consent-row" id="licenseConsentRow">
+              <input type="checkbox" id="licenseConsent" name="licenseConsent" required />
+              <span>Saya memahami bahwa harga paket adalah biaya jasa instalasi. Lisensi/aktivasi Windows dan Microsoft Office tidak termasuk dan harus menggunakan lisensi resmi milik pelanggan.</span>
+            </label>
 
             <div class="form-actions">
-              <button type="submit" class="btn btn-primary">Buat Ringkasan &amp; Kirim WA</button>
-              <button type="button" class="btn btn-ghost" id="copySummaryBtn">Salin Teks</button>
+              <button type="submit" class="btn btn-primary">Kirim Pesanan ke WhatsApp</button>
+              <button type="button" class="btn btn-ghost" id="copySummaryBtn">Salin Ringkasan</button>
             </div>
 
             <div class="summary-output" id="summaryOutput" hidden>
-              <div class="summary-label">Ringkasan Pesan:</div>
+              <div class="summary-label">Ringkasan Pesanan</div>
               <pre id="summaryText"></pre>
             </div>
           </form>
@@ -224,4 +318,4 @@
 
   <script src="script.js"></script>
 </body>
-</html>
+  </html>
