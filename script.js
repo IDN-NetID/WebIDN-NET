@@ -167,7 +167,6 @@ document.addEventListener("DOMContentLoaded", () => {
       "HALO IDN-NET (@est2025), SAYA INGIN MEMESAN LAYANAN",
       "================================",
       `Nama lengkap: ${value("clientName")}`,
-      `Nomor WhatsApp pelanggan: ${value("clientPhone")}`,
       `Jenis layanan: ${serviceSelect.value}`
     ];
 
